@@ -1,0 +1,144 @@
+%P01 * find the last element of a list
+last([H|[]],H).
+last([_|T],X) :- last(T,X).
+
+%P02 * find the last but one element of a list
+lastbutone([H1,_|[]],H1) :- !.
+lastbutone([_|T],X) :- lastbutone(T,X).
+
+%P03 * find the k-th element of a list
+element_at(X,[X|_],1).
+element_at(X,[_|T],N) :- N>1, N1 is N-1, element_at(X,T,N1).
+
+%P04 * find the number of elements of a list
+my_length([],0).
+my_length([_|T],N1) :- my_length(T,N), N1 is N+1.
+
+%P05 * reverse a list
+my_reverse(L1,L2) :- my_rev(L1,L2,[]).
+my_rev([],L2,L2).
+my_rev([H|T],List,Acc) :- my_rev(T,List,[H|Acc]).
+
+%P06 * find out whether a list is a palindrome
+palindrome(L) :- my_reverse(L,L).
+
+%P07 ** FLATTEN A NESTED LIST STRUCTURE
+my_flatten(X,[X]) :- \+ is_list(X).
+my_flatten([],[]).
+my_flatten([X|Xs],Zs) :- my_flatten(X,Y), my_flatten(Xs,Ys), append(Y,Ys,Zs).
+
+%P08 ** Eliminate consecutive duplicates of list elements
+compress([],[]).
+compress([X],[X]).
+compress([H1,H2|T],[H1|X]) :- H1\=H2, compress([H2|T],X) .
+compress([H1,H1|T], X) :- compress([H1|T],X) .
+
+%P09 ** Pack consecutive duplicates of list elements into sublists
+
+%P14 * Duplicate the elements of a list
+my_duplicate([],[]).
+my_duplicate([H|T],[H,H|X]) :- my_duplicate(T,X).
+
+
+%P15 ** Duplicate the elements of a list given number of times
+%my_duplicate2(List,Count,Res).
+my_duplicate2(List,Count,Res) :- my_dup(List,Count,Res,Count).
+my_dup([],_,[],_).
+my_dup([_|T],N,Y,0) :- my_dup(T,N,Y,N).
+my_dup([H|T],C,[H|T2],N) :- N>0, N1 is N-1,my_dup([H|T],C,T2,N1).
+
+
+%P16 ** Drop every n-th element from a list
+%drop(List,N,Res).
+drop(List,N,Res) :- my_drop(List,N,Res,1).
+my_drop([],_,[],_).
+my_drop([_|T],N,Res,N) :- !,my_drop(T,N,Res,1).
+my_drop([H|T],N,[H|T2],C) :- C>0, CC is C+1, my_drop(T,N,T2,CC).
+
+% P17 * Split a list into two parts (the length of the first part is
+% given)
+%split(List,N,L1,L2).
+split(List,N,L1,L2) :- my_split(List,N,L1,L2,1).
+my_split([],_,[],[],_).
+my_split([H|T],N,[H|X],L2,C) :- C>0, C=<N,!, CC is C+1, my_split(T,N,X,L2,CC).
+my_split([H|T],N,L1,[H|X],C) :- my_split(T,N,L1,X,C).
+
+%P18 ** Extract a slice from a list
+%slice(List,From,To,Res).
+slice(List,From,To,Res) :-  my_slice(List,From,To,Res,1).
+my_slice([],_,_,[],_).
+my_slice([_|T],From,To,Res,C) :- C<From,!, CC is C+1, my_slice(T,From,To,Res,CC).
+my_slice([H|T],From,To,[H|X],C) :- C=<To,C>=From,!, CC is C+1, my_slice(T,From,To,X,CC).
+my_slice([_|T],From,To,Res,C) :- C>To,!, my_slice(T,From,To,Res,C).
+
+%P19 ** Rotate a list N places to the left.
+%rotate(List,N,Res).
+my_count([],0).
+my_count([_|T],C) :- my_count(T,K), C is K+1.
+rotate(List,N,Res) :- N>=0,!,split(List,N,L1,L2), append(L2,L1,Res).
+rotate(List,N,Res) :- my_count(List,C), A is abs(N), K is C-A, split(List,K,L1,L2), append(L2,L1,Res).
+
+%P20 * Remove the k-th element from a list
+%remove_at(X,List,Pos,Res)
+remove_at(X,List,Pos,Res) :- my_remove_at(X,List,Pos,Res,1).
+my_remove_at(_,[],_,[],_).
+my_remove_at(X,[H|T],N,[H|T2],C) :- C\=N, !, C1 is C+1, my_remove_at(X,T,N,T2,C1).
+my_remove_at(H,[H|T],N,Res,C) :- C1 is C+1, my_remove_at(H,T,N,Res,C1).
+
+%P21 * Insert an element at a given position into a list
+%insert_at(X,List,Pos,Res).
+insert_at(X,List,Pos,Res) :- my_insert_at(X,List,Pos,Res,1).
+my_insert_at(_,[],_,[],_).
+my_insert_at(X,[H|T],Pos,[H|T2],C) :- C\=Pos, C1 is C+1, my_insert_at(X,T,Pos,T2,C1).
+my_insert_at(X,[H|T],Pos,[X,H|T2],Pos) :- C1 is Pos+1, my_insert_at(X,T,Pos,T2,C1).
+
+
+%P22 * Create a list containing all integers within a given range
+%range(From,To,Res).
+range(X,X,[X]).
+range(F,T,[F|X]) :- F<T, F1 is F+1, range(F1,T,X).
+
+%%	----------------- BINARY TREE
+
+%P54a * Check whether a given term represents a binary tree
+istree(void).
+istree(tree(_,void,void)).
+istree(tree(_,L,R)) :- istree(L), istree(R).
+
+%P56 * Symmetric binary tree (structure not content)
+symmetric(tree(_,L,R)) :- mirror(L,R).
+mirror(void,void).
+mirror(tree(_,L1,R1),tree(_,L2,R2)) :- mirror(L1,R2), mirror(L2,R1).
+
+%P61 * Count the leaves of a binary tree
+count_leaves(void,0).
+count_leaves(tree(_,void,void),1) :-!.
+count_leaves(tree(_,L,R),Res) :- count_leaves(L,R1), count_leaves(R,R2), Res is R1+R2.
+
+%P61A * Collect the leaves of a binary tree in  a list
+collect_leave(void,[]).
+collect_leave(tree(X,void,void),[X]):-!.
+collect_leave(tree(_,L,R),Res) :- collect_leave(L,N), collect_leave(R,N1), append(N,N1,Res).
+
+%P62 * Collect the internal nodes of a binary tree in a list
+collect_internals(void,[]).
+collect_internals(tree(_,void,void),[]):-!.
+collect_internals(tree(X,L,R),[X|T]) :- collect_internals(L,T1), collect_internals(R,T2), append(T1,T2,T).
+
+count_internals(Tree,Count):- collect_internals(Tree,List), lenghtlist(List,Count).
+lenghtlist([],0).
+lenghtlist([_|T],N) :- lenghtlist(T,N1), N is N1+1.
+
+%P62B * Collect the nodes at a given level in a list
+% at_level(T,L,S). S is the list of nodes of the binary tree T at level L
+at_level(void,_,[]).
+at_level(tree(X,_,_),1,[X]):-!.
+at_level(tree(_,L,R),D,S) :- D>1, D1 is D-1, at_level(L,D1,S1),at_level(R,D1,S2), append(S1,S2,S).
+
+%P63 **Construct a complete binary tree
+complete_binary_tree(T,N) :- complete_binary_tree(T,N,1).
+complete_binary_tree(void,N,A) :- A>N.
+complete_binary_tree(tree(_,L,R), N, A) :- A=<N,
+	AL is A*2, AR is AL+1,
+	complete_binary_tree(L,N,AL),
+	complete_binary_tree(R,N,AR).
