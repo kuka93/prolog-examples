@@ -1,0 +1,33 @@
+Exercise  2.1 Which of the following pairs of terms unify? Where relevant, give the variable instantiations that lead to successful unification. 
+1. bread  =  bread 					yes
+2. ’Bread’  =  bread 					no
+3. ’bread’  =  bread 					yes
+4. Bread  =  bread 					Bread=bread
+5. bread  =  sausage 					no
+6. food(bread)  =  bread 					no
+7. food(bread)  =  X 					X=food(bread)
+8. food(X)  =  food(bread) 				X=bread
+9. food(bread,X)  =  food(Y,sausage) 			X=bread, Y=sauage
+10. food(bread,X,beer)  =  food(Y,sausage,X) 		no
+11. food(bread,X,beer)  =  food(Y,kahuna_burger) 	no
+12. food(X)  =  X 						X=food(X)
+13. meal(food(bread),drink(beer))  =  meal(X,Y) 	X=food(bread), Y=drink(beer)
+14. meal(food(bread),X)  =  meal(X,drink(beer)) 	no
+
+ Exercise  2.2 We are working with the following knowledge base:
+   house_elf(dobby).
+   witch(hermione).
+   witch(’McGonagall’).
+   witch(rita_skeeter).
+   magic(X):-  house_elf(X).
+   magic(X):-  wizard(X).
+   magic(X):-  witch(X).
+
+Which of the following queries are satisfied? Where relevant, give all the variable instantiations that lead to success.
+
+    ?-  magic(house_elf).		false
+    ?-  wizard(harry).			Not definied
+    ?-  magic(wizard).			false
+    ?-  magic(’McGonagall’).		true
+    ?-  magic(Hermione).		true – Hermione=dobby; Hermione='McGsonagall', Hermione=rita_skeeter; Hermione=hermione
+
