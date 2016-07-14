@@ -1,0 +1,165 @@
+%write a prolog program counting the elements of a list of list
+member_new(X,[X|_]).
+member_new(X,[_|T]) :- member_new(X,T).
+
+memberlist_new(X,[X|_]).
+memberlist_new(X,[H|_]) :- memberlist_new(X,H).
+memberlist_new(X,[_|T]) :- memberlist_new(X,T).
+
+counter_new([],0).
+counter_new([_|T],X) :- counter_new(T,N), X is N+1.
+
+counterlist_new([],0).
+counterlist_new([H|_],X) :- counterlist_new(H,N), X is N+1.
+counterlist_new([_|T],X) :- counterlist_new(T,N), X is N+1.
+
+
+%%	write a prolog program which returna a list containing the nodes
+%%	at a given depth D of a binary tree
+%at_level(Tree,D,Res)
+at_level(void,_,[]).
+at_level(tree(X,_,_),1,[X]).
+at_level(tree(_,L,R),D,S) :- D>1, D1 is D-1, at_level(L,D1,S1), at_level(R,D1,S2), append(S1,S2,S).
+
+
+%%	Consider the prolog terms representing the binary trees whose
+%%	nodes are labelled by a constant symbol and, in addition, store
+%%	the depth of the node. Write a prolog program that returns true
+%%	if its argument is a binary tree as above specified.
+%is_binary_tree_(Tree) //tree(Node,Depth,Left,Right)
+is_binary_tree_(Tree) :- is_binary_tree_(Tree,1).
+is_binary_tree_(tree(_,N,void,void),N) :- !.
+is_binary_tree_(tree(_,N,L,R),N) :- N1 is N+1, is_binary_tree_(L,N1),is_binary_tree_(R,N1).
+
+
+%%	Write a prolog program that, given in input a binary tree and a
+%	constant, returns the depth of a node containing the given
+%	constant
+%return_node(Tree,Value,Res).
+return_node(Tree,Value,Res) :- return_node(Tree,Value,Res,1).
+return_node(tree(X,_,_),X,Res,Res) :- !.
+return_node(tree(X,L,_),Value,Res,D) :- X\=Value, D1 is D+1, return_node(L,Value,Res,D1).
+return_node(tree(X,_,R),Value,Res,D) :- X\=Value, D1 is D+1, return_node(R,Value,Res,D1).
+
+
+%%	The same as before, but the tree contains the information about
+%	the depth of a node
+%return_node2(Tree,Value,Res).
+return_node2(tree(X,N,_,_),X,N).
+return_node2(tree(X,_,L,_),A,Res) :- A\=X, return_node2(L,A,Res).
+return_node2(tree(X,_,_,R),A,Res) :- A\=X, return_node2(R,A,Res).
+
+
+%%	Binary trees isomorphism: T and T' are isomorphic, that is T,T'
+%	are empty, T,T' are composed by a single node, T,T' have the
+%	same number k>1 of subtrees and the i-th subtree of T is
+%	isomorphic to the i-th subtree of T'
+%isotree(X,Y).
+% tree(a,tree(b,tree(d,void,void),tree(e,void,void)),tree(c,tree(f,void,void),tree(g,void,void)))
+isotree(void,void).
+isotree(tree(_,L1,R1), tree(_,L2,R2)) :- !,isotree(L1,L2),isotree(R1,R2).
+isotree(tree(_,L1,R1), tree(_,L2,R2)) :- !,isotree(L1,R2),isotree(R1,L2).
+
+%%	Write a prolog program that, given in input a binary tree
+%	without the depth information on the nodes, returns an
+%	isomorphic binary tree with the depth information stored in the
+%	nodes
+%construct_isomorphic(tree(X,void,void),tree(X,void,void)).
+construct_isomorphic(Tree, Res) :- construct_isomorphic(Tree, Res, 1).
+construct_isomorphic(void,void).
+construct_isomorphic(tree(X,void,void),tree(X,D,void,void), D) :- !.
+construct_isomorphic(tree(X,L1,R1),tree(X,D,L2,R2),D) :- D1 is D+1,construct_isomorphic(L1,L2,D1), construct_isomorphic(R1,R2,D1).
+construct_isomorphic(tree(X,L1,R1),tree(X,D,L2,R2),D) :- D1 is D+1,construct_isomorphic(L1,R2,D1), construct_isomorphic(R1,L2,D1).
+
+
+%%	Define the predicate notMember(X,L), true if X does not occur in
+%	the list L. Provide a definition using NAF and one without it,
+%	and compare them
+my_member(X,[X|_]).
+my_member(X,[_|T]) :- my_member(X,T).
+notmember(X,L) :- not(my_member(X,L)).
+notmember(_,[]) :- true.
+
+
+%%	 Apply the cut operator to the program insert, and draw the
+%	seach tree for the goal insert(4,[3,5,7],X).
+%insert(X,[H|T],[H|T2]) :- X=<H,!, insert(X,T,T2).
+insert(X,[H|T],[H|T2]) :- H<X, !,  insert(X,[X|T],T2).
+insert(X,[H|T],[H|T2]) :- insert(X,T,T2).
+insert(_,[],[]).
+
+
+
+%%	Define union using the negation of member. Build the search tree
+%	for the goal
+%union(L1,L2,Res).
+my_union([H|T],L2,[H|T2]) :- notmember(H,L2),!, my_union(T,L2,T2).
+my_union([H|T],L2, T2) :- my_member(H,L2),!, my_union(T,L2,T2).
+my_union([],L,L) :-!.
+my_union([],[],[]).
+
+%my_intersection(L1,L2,Res).
+my_intersection([H|T],L2,T2) :- notmember(H,L2), !, my_intersection(T,L2,T2).
+my_intersection([H|T],L2,[H|T2]) :- my_member(H,L2), !, my_intersection(T,L2,T2).
+my_intersection([],_,[]).
+
+%my_difference().
+my_difference([],_,[]).
+my_difference(_,[],[]).
+my_difference([H|T],L2,T2) :- my_member(H,L2), my_difference(T,L2,T2).
+my_difference([H|T],L2,[H|T2]) :- notmember(H,L2),  my_difference(T,L2,T2).
+
+
+
+%%	Merge sort
+mergesort([],[]).
+mergesort([X],[X]).
+mergesort(X,Res) :- X=[_,_|_], dividelist(X,L1,L2),  mergesort(L1,Sorted1), mergesort(L2,Sorted2), !,merge_list2(Sorted1,Sorted2,Res).
+
+%dividelist(List,L1,L2).
+dividelist([],[],[]).
+dividelist([H|[]],[H|[]],[]).
+dividelist([H1,H2|T],[H1|T1],[H2|T2]) :- dividelist(T,T1,T2).
+
+merge_list2([H1|T1],[H2|T2],[H1|T]) :- H1=<H2, !,merge_list2(T1,[H2|T2],T).
+merge_list2([H1|T1],[H2|T2],[H2|T]) :- H1>H2, !, merge_list2([H1|T1],T2,T).
+merge_list2([],L,L) :- !.
+merge_list2(L,[],L) :- !.
+
+
+%%	Preorder visit of a binary tree
+my_preorder(void,[]).
+my_preorder(tree(X,L,R),Res) :- my_preorder(L,Res1), my_preorder(R,Res2),append([X|Res1],Res2,Res).
+
+%%	Postorder visit of a binary tree
+my_postorder(void,[]).
+my_postorder(tree(X,L,R), Res) :- my_postorder(L,X1), my_postorder(R,X2), append(X2,[X],Res1), append(X1,Res1,Res).
+
+%%	Inorder visit of a binary tree
+my_inorder(void,[]).
+my_inorder(tree(X,L,R),Res) :- my_inorder(L,X1), my_inorder(R,X2), append(X1,[X|X2],Res).
+
+%foo([],[]).
+%foo([[A|_]|L],[A|P]) :- foo(L,P).
+
+foo([]).
+foo([[A,B],[C,D]|Xs]) :- S1 is A+B,S2 is C+D, S1 =:= S2, foo([[C,D]|Xs]).
+foo([[_,_]]).
+
+
+%%	Write a prolog program that takes a binary tree and a list of
+%	properties as input and checks if there exists a full path in
+%	the binary tree that coincides with the list of properties
+find_path(Tree,List) :- path(Tree,Res), check(Res,List).
+path(tree(X,L,_),[X|T]) :- path(L,T).
+path(tree(X,_,R),[X|T]) :- path(R,T).
+path(void,[]).
+check([H|T],[H|T1]) :- check(T,T1).
+check([],[]).
+
+
+%%	Write a prolog program that, given a list L of pairs [X,Y],
+%	checks that Y never assumes the same value twice
+foo2(L) :- foo2(L,[]).
+foo2([[_,B]|T],[B|Res]) :- foo2(T,Res).
+foo2([],[]).
