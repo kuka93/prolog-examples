@@ -1,0 +1,115 @@
+%% Given an element and a list, write a prolog program that deletesall
+%% the occurences of the element from the list
+foo(_,[],[]).
+foo(I,[I|P],R) :- foo(I,P,R).
+foo(I,[H|T],[H|R]) :- H\=I, foo(I,T,R).
+
+
+edge(1, 2). edge(1, 3). edge(2, 4). edge(3, 4). edge(4, 5).
+edge(4, 6). edge(5, 7). edge(6, 8). edge(7, 9). edge(8, 9).
+path(X,Y,[X,Y]) :- Y>X, edge(X,Y).
+path(X,Y,[X|T]) :- Y>X, edge(X,Z), path(Z,Y,T).
+
+% Check if element of a list are contained in a list of lists
+foo1([],_) :-!.
+foo1([H1|T1],X) :- foo2(H1,X), foo1(T1,X), !.
+foo2(_,[]).
+foo2(X,[H|T]) :- member(X,H), foo2(X,T), !.
+
+
+bar(d, b).
+bar(s, l).
+bar(l, f).
+bar(b, a).
+foo1(X, Y, L) :- bar(X,Z), bar(Z,Y), not(member(Z, L)), !.
+foo1(X, Y, L) :- bar(X,Z), bar(Z,W), not(member(Z, L)), foo1(W, Y, L), !.
+
+%%	Write a prolog program that, given two lists L1 and L2, outputs
+%	two new lists L3 and L4 such that L3 contains the elements of L1
+%	which also belong to L2, while L4 contains the elements of L1
+%	which do not belong to L2.
+%	listmem([a,r,t],[t,s,m,n,a],L3,L4) produces L3=[a,t], L4=[R]
+listmem([],_,[],[]).
+listmem([H|T],L2,[H|T3],L4) :- member(H,L2), !, listmem(T,L2,T3,L4).
+listmem([H|T],L2,L3,[H|T4]) :- not(member(H,L2)), !, listmem(T,L2,L3,T4).
+
+
+edge2(a,b). edge2(b,c). edge2(c,d).
+my_val(a,1). my_val(b,0). my_val(c,1). my_val(d,2).
+my_path(X,Y,[X,Y]) :- my_val(X,0), my_val(Y,0), edge2(X,Y).
+my_path(X,Y,[X,Y]) :- my_val(X,1), my_val(Y,0), edge2(X,Y).
+my_path(X,Y,[X,Y]) :- my_val(X,0), my_val(Y,1), edge2(X,Y).
+my_path(X,Y,[X,Y]) :- my_val(X,1), my_val(Y,1), edge2(X,Y).
+
+my_path(X,Y,[X|T]) :- my_val(X,0), edge2(X,Z), my_path(Z,Y,T).
+my_path(X,Y,[X|T]) :- my_val(X,1), edge2(X,Z), my_path(Z,Y,T).
+
+
+foo4(L, [H|R1]) :- foo4(L,R1,H).
+foo4([H],[], H).
+foo4([H|T],[H|T1],R) :- foo4(T, T1, R).
+
+
+%%	Consider trees whose nodes are labelled with positive integers.
+%	Write a program that given such a tree as input, verifies that
+%	it is a binary search tree. A binary search tree is a tree where
+%	the value of each node is greater than the value of the left
+%	child and smaller or equal to the value of the right child.
+check_binary_tree(tree(X,L,R)) :- X>0, check_binary_tree_left(L,X),check_binary_tree_right(R,X).
+check_binary_tree_left(tree(X,L,R),Root) :- X < Root, check_binary_tree_left(L,X), check_binary_tree_right(R,X).
+check_binary_tree_left(void,_).
+check_binary_tree_right(tree(X,L,R),Root) :- X >= Root, check_binary_tree_left(L,X), check_binary_tree_right(R,X).
+check_binary_tree_right(void,_).
+
+
+tran(uno, one). tran(due, two). tran(tre, three).
+tran(quattro, four). tran(cinque, five). tran(sei, six).
+tran(sette, seven). tran(otto, eight). tran(nove, nine).
+
+listtran([H|T],[Y|T2]) :- tran(H,Y), listtran(T,T2).
+listtran([],[]).
+
+
+bar2(X,L) :- append(X,_,L).
+bar1(X,L) :- append(_,X,L).
+foo5(X,L) :- bar1(S,L), bar2(X,S).
+
+
+%% Given a binary tree, where the nodes contain integer numbers, write a
+%% Prolog program which returns a full path such taht all the elements
+%% in the path appear in increasing order from the root to the leaf
+find_path2(Tree,List) :- path2(Tree,Res), check2(Res,List,_).
+path2(tree(X,L,_),[X|T]) :- path2(L,T).
+path2(tree(X,_,R),[X|T]) :- path2(R,T).
+path2(void,[]).
+check2([H1,H2|T],[H1,H2|T2],H2) :- H2 =:= H1+1, check2(T,T2,H2).
+check2([H|[]],[H|[]],H2) :- H =:= H2+1.
+check2([],[]).
+
+
+foo6([C],[C]).
+foo6([A,B|F],[C|I]) :- C is A+B, foo6(F,I).
+
+
+post_order_visit(tree(X,L,R),Res) :- post_order_visit(L,X1), post_order_visit(R,X2), append(X2,[X],Res1), append(X1,Res1,Res).
+post_order_visit(void,[]).
+
+
+%%	Assume you have a graph that is encoded as a list of edges in
+%	your knowledge base. Each edge is a directed connection between
+%	two nodes identified by an integer number. Write a prolog
+%	program that, given a start node verifies that there is a path
+%	with a loop.
+edge3(1, 3). edge3(1, 2). edge3(2, 3).
+edge3(3, 4). edge3(4, 5). %edge3(5,1).
+cycle_loop(X) :- cycle_loop(X,[]).
+cycle_loop(Curr,Visited) :- member(Curr,Visited), !.
+cycle_loop(Curr,Visited) :- edge3(Curr,Next), cycle_loop(Next, [Curr|Visited]).
+
+
+foo6([X, Y, Z]) :- Z is X * Y, !.
+foo6([X, Y, Z | T]) :- Z is X * Y, !, foo6([Y,Z | T]).
+
+
+depth_tree(tree(_,void,void),1) :- !.
+depth_tree(tree(_,L,R),D) :- depth_tree(L,D1), depth_tree(R,D2), D is max(D1,D2)+1.
